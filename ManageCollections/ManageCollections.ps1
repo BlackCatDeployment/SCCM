@@ -74,7 +74,7 @@ $script:objResult     = @{ Success=0; Warning=0; Error=0 }
 #############
 # FUNCTIONS #
 #############
-Function Create-Collection {
+Function New-Collection {
     [CmdletBinding()]
     Param (
 	    [Parameter(Mandatory=$true)][String] $Name,
@@ -134,9 +134,9 @@ Function Create-Collection {
         #region ColSchedule
         ## Defining Collection Shedule
         If (!([String]::IsNullOrEmpty($Schedule))) {
-            $objSchedule = Manage-CollectionSchedule -Value $Schedule
+            $objSchedule = Set-CollectionSchedule -Value $Schedule
             $CollectionProperties += @{
-                RefreshSchedule = New-CMSchedule -Start (Get-Date) –RecurInterval $objSchedule.RefreshInterval –RecurCount $objSchedule.RefreshCount
+                RefreshSchedule = New-CMSchedule -Start (Get-Date) â€“RecurInterval $objSchedule.RefreshInterval â€“RecurCount $objSchedule.RefreshCount
                 RefreshType = $objSchedule.RefreshType
             }
         }
@@ -210,7 +210,7 @@ Function Create-Collection {
 }
 
 
-Function Replace-Collection {
+Function Restore-Collection {
     [CmdletBinding()]
     Param (
 	    [Parameter(Mandatory=$true)][String] $Name,
@@ -225,8 +225,6 @@ Function Replace-Collection {
         [Parameter(Mandatory=$false)][String] $User = ""
     )
 
-    $CollectionPath = "$($sitecode):\$($Type)Collection"
-
     # Get Collection object
     $objCollection = . "Get-CM$($Type)Collection" -Name $Name
 
@@ -239,7 +237,7 @@ Function Replace-Collection {
         }
     }
 
-    Create-Collection -Name $Name `
+    New-Collection -Name $Name `
         -Type $Type `
         -Comment $Comment `
         -Folder $Folder `
@@ -271,7 +269,7 @@ Function Remove-Collection {
 
     # Check if the collection to delete is a limiting collection of other collection(s)
     WriteToLog "[INFO]`tChecking Collection references..."
-    $objLimitingCollections = . "Get-CM$($Type)Collection" | ? { $_.LimitToCollectionName -eq $objCollection.Name }
+    $objLimitingCollections = . "Get-CM$($Type)Collection" | Where-Object { $_.LimitToCollectionName -eq $objCollection.Name }
     If (($objLimitingCollections -ne $null) -and ($objLimitingCollections.Count -ne 0)) {
         WriteToLog "[FAIL]`tCollection can't be deleted because referring to $($objLimitingCollections.Count) following collections:"
         WriteToLog "[FAIL]`t$($objLimitingCollections.Name -join ", ")"
@@ -285,7 +283,7 @@ Function Remove-Collection {
     $DisplayWarning = $false
     WriteToLog "[INFO]`tChecking Collection Membership Rules dependences..."
     # To reduce process delay, get all collections with Include/Exclude Collection Membership rule(s)
-    $objMembershipCollections = . "Get-CM$($Type)Collection" | ? { $_.IncludeExcludeCollectionsCount -ne 0 }
+    $objMembershipCollections = . "Get-CM$($Type)Collection" | Where-Object { $_.IncludeExcludeCollectionsCount -ne 0 }
     If (($objMembershipCollections -ne $null) -and ($objMembershipCollections.Count -ne 0)) {
         ForEach ($objMemberCollection in $objMembershipCollections) {
             # Check Include Membership Rules
@@ -327,7 +325,7 @@ Function Remove-Collection {
     
     # Check if the collection to delete is granted to administrative user(s)
     WriteToLog "[INFO]`tChecking Collection Administrative User(s) permissions..."
-    $objAdmUsers = Get-CMAdministrativeUser | ? { $_.CollectionNames -eq $objCollection.Name }
+    $objAdmUsers = Get-CMAdministrativeUser | Where-Object { $_.CollectionNames -eq $objCollection.Name }
     If (($objAdmUsers -ne $null) -and ($objAdmUsers.Count -ne 0)) {
         WriteToLog "[WARN]`tRemoving Collection from Administrative User(s) permissions..."
         $objResult.Warning++
@@ -362,7 +360,7 @@ Function Remove-Collection {
 }
 
 
-Function Manage-Collection {
+Function Start-CollectionManagement {
     $nbItem = 0
     $nbTotalItems = $csv_import.Count
 
@@ -385,7 +383,7 @@ Function Manage-Collection {
 
         Switch ($item.Implement.ToLower()) {
             "a" {
-                Create-Collection -Name $item.CollectionName `
+                New-Collection -Name $item.CollectionName `
                     -Type $CollectionTypeName `
                     -Comment $item.CollectionComment `
                     -Folder $item.CollectionFolder `
@@ -396,7 +394,7 @@ Function Manage-Collection {
             }
 
             "r" {
-                Replace-Collection -Name $item.CollectionName `
+                Restore-Collection -Name $item.CollectionName `
                     -Type $CollectionTypeName `
                     -Comment $item.CollectionComment `
                     -Folder $item.CollectionFolder `
@@ -470,7 +468,7 @@ Function Add-CollectionRule {
                     WriteToLog "[INFO]`tCollection Query Rule [$strRuleName] added"
                 }
                 catch {
-                    WriteToLog "[FAIL]`tCollection Query Rule n°$($i+1) can't be added! $($_.Exception.Message)"
+                    WriteToLog "[FAIL]`tCollection Query Rule nÂ°$($i+1) can't be added! $($_.Exception.Message)"
                 }
             }
             #endregion ColRuleQuery
@@ -490,12 +488,12 @@ Function Add-CollectionRule {
                             WriteToLog "[INFO]`tCollection Direct Rule for [$elt] added"
                         }
                         Else {
-                            WriteToLog "[WARN]`tResource [$elt] wasn't found! Can't add Direct Rule n°$($i+1)"
+                            WriteToLog "[WARN]`tResource [$elt] wasn't found! Can't add Direct Rule nÂ°$($i+1)"
                             $objResult.Warning++
                         }
                     }
                     catch {
-                        WriteToLog "[FAIL]`tCollection Direct Rule n°$($i+1) can't be added for [$elt]! $($_.Exception.Message)"
+                        WriteToLog "[FAIL]`tCollection Direct Rule nÂ°$($i+1) can't be added for [$elt]! $($_.Exception.Message)"
                     }
                 }
             }
@@ -515,12 +513,12 @@ Function Add-CollectionRule {
                             WriteToLog "[INFO]`tCollection Include Rule for [$elt] added"
                         }
                         Else {
-                            WriteToLog "[WARN]`tCollection [$elt] wasn't found! Can't add Include Rule n°$($i+1)"
+                            WriteToLog "[WARN]`tCollection [$elt] wasn't found! Can't add Include Rule nÂ°$($i+1)"
                             $objResult.Warning++
                         }
                     }
                     catch {
-                        WriteToLog "[FAIL]`tCollection Include Rule n°$($i+1) can't be added for [$elt]! $($_.Exception.Message)"
+                        WriteToLog "[FAIL]`tCollection Include Rule nÂ°$($i+1) can't be added for [$elt]! $($_.Exception.Message)"
                         $objResult.Error++
                     }
                 }
@@ -541,12 +539,12 @@ Function Add-CollectionRule {
                             WriteToLog "[INFO]`tCollection Exclude Rule for [$elt] added"
                         }
                         Else {
-                            WriteToLog "[WARN]`tCollection [$elt] wasn't found! Can't add Exclude Rule n°$($i+1)"
+                            WriteToLog "[WARN]`tCollection [$elt] wasn't found! Can't add Exclude Rule nÂ°$($i+1)"
                             $objResult.Warning++
                         }
                     }
                     catch {
-                        WriteToLog "[FAIL]`tCollection Include Rule n°$($i+1) can't be added for [$elt]! $($_.Exception.Message)"
+                        WriteToLog "[FAIL]`tCollection Include Rule nÂ°$($i+1) can't be added for [$elt]! $($_.Exception.Message)"
                         $objResult.Error++
                     }
                 }
@@ -558,7 +556,7 @@ Function Add-CollectionRule {
             }
         }
         Else {
-            WriteToLog "[WARN]`tNo Collection Query was filled in the CSV file for the Rule [$RType] n°$($i+1)"
+            WriteToLog "[WARN]`tNo Collection Query was filled in the CSV file for the Rule [$RType] nÂ°$($i+1)"
             $objResult.Warning++
         }
 
@@ -566,7 +564,7 @@ Function Add-CollectionRule {
     }
 }
 
-Function Manage-CollectionSchedule {
+Function Set-CollectionSchedule {
     [CmdletBinding()]
     Param (
 	    [Parameter(Mandatory=$true)][String] $Value
@@ -716,7 +714,7 @@ $InitialLocation = Get-Location
 Set-Location "$($sitecode):"
 
 # Manage collections according to CSV import
-Manage-Collection
+Start-CollectionManagement
 WriteToLog "[INFO]`t$($objResult.Success) Success, $($objResult.Warning) Warnings, $($objResult.Error) Errors"
 WriteToLog "[STOPPED]"
 
