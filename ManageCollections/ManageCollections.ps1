@@ -136,7 +136,7 @@ Function New-Collection {
         If (!([String]::IsNullOrEmpty($Schedule))) {
             $objSchedule = Set-CollectionSchedule -Value $Schedule
             $CollectionProperties += @{
-                RefreshSchedule = New-CMSchedule -Start (Get-Date) –RecurInterval $objSchedule.RefreshInterval –RecurCount $objSchedule.RefreshCount
+                RefreshSchedule = New-CMSchedule -Start (Get-Date) -RecurInterval $objSchedule.RefreshInterval -RecurCount $objSchedule.RefreshCount
                 RefreshType = $objSchedule.RefreshType
             }
         }
