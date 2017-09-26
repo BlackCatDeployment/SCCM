@@ -106,10 +106,16 @@ It displays at the end of its execution the number of Success, Warnings and Erro
 
 ## Notes
 
-This script must be run on a ConfigMgr Current Branch server on Windows Server 2012 R2 minimum.
-It wasn't tested on ConfigMgr 2012 R2 neither on Windows Server 2008 R2.
-It uses the ConfigurationManager PoSh module
+This script has been tested on these platforms:
 
-I added Operational Collections created by Benoit Lecours in the CSV File **[CreateOperationalCollections.csv](https://github.com/BlackCatDeployment/SCCM/blob/master/ManageCollections/CreateOperationalCollections.csv)**
+- ConfigMgr 2012 R2 SP1 (v5.0.8239.1000) under Windows Server 2008 R2 SP1 (PowerShell 3.0)
+  - Operational collections like Windows 10 Support State or Windows 10 Branch detection are not working.
+  - Use the CSV file "CreateOperationalCollections.csv-For2012"
+- ConfigMgr CB 1702 (v5.0.8498.1000) under Windows Server 2016 (PowerShell 5.1)
+  - Use the CSV file "CreateOperationalCollections.csv-ForCB"
+
+It uses the ConfigurationManager PoSh module.
+
+I added Operational Collections created by Benoit Lecours in the CSV File **[CreateOperationalCollections-ForCB.csv](https://github.com/BlackCatDeployment/SCCM/blob/master/ManageCollections/CreateOperationalCollections-ForCB.csv)**
 
 Thanks to [Marius / Hican](https://gallery.technet.microsoft.com/scriptcenter/SCCM-2012-Management-b36e7aeb) and [Benoit Lecours](https://gallery.technet.microsoft.com/Set-of-Operational-SCCM-19fa8178) for their scripts basis.
