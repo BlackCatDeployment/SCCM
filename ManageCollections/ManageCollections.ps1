@@ -25,9 +25,9 @@
    Set the CSV file to use.
    It must be located on the script folder.
 .NOTES
-    Version:         1.2
+    Version:         1.3
     Author:          Florian Valente
-    Date:            2017/09/18
+    Date:            2018/03/16
     Version History: 1.0 : 2017/09/04 - Florian Valente
                          - Initial version
                      1.1 : 2017/09/18 - Florian Valente
@@ -37,6 +37,9 @@
                            - Check Collection references
                            - Check Collection Membership Rules dependences
                            - Check Collection Administrative User(s) permissions
+		     1.3 : 2018/03/16 - Florian Valente
+		     	 - Improve the New-Collection function
+			   - Add random hour:minute for the New-CMSchedule to avoid overload during SCCM collection updates
     Helpers:         Marius / Hican - http://www.hican.nl - @hicannl
                      https://gallery.technet.microsoft.com/scriptcenter/SCCM-2012-Management-b36e7aeb
                      Benoit Lecours
@@ -136,7 +139,7 @@ Function New-Collection {
         If (!([String]::IsNullOrEmpty($Schedule))) {
             $objSchedule = Set-CollectionSchedule -Value $Schedule
             $CollectionProperties += @{
-                RefreshSchedule = New-CMSchedule -Start (Get-Date) -RecurInterval $objSchedule.RefreshInterval -RecurCount $objSchedule.RefreshCount
+                RefreshSchedule = New-CMSchedule -Start (Get-Date -Hour (Get-Random 23) -Minute (Get-Random 59)) -RecurInterval $objSchedule.RefreshInterval -RecurCount $objSchedule.RefreshCount
                 RefreshType = $objSchedule.RefreshType
             }
         }
