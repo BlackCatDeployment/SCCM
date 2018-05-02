@@ -111,7 +111,7 @@ This script has been tested on these platforms:
 - ConfigMgr 2012 R2 SP1 (v5.0.8239.1000) under Windows Server 2008 R2 SP1 (PowerShell 3.0)
   - Operational collections like Windows 10 Support State or Windows 10 Branch detection are not working.
   - Use the CSV file "CreateOperationalCollections.csv-For2012"
-- ConfigMgr CB 1702 (v5.0.8498.1000) under Windows Server 2016 (PowerShell 5.1)
+- ConfigMgr CB 1702 (v5.0.8498.1000), 1802 (v5.0.8634.1000) under Windows Server 2016 (PowerShell 5.1)
   - Use the CSV file "CreateOperationalCollections.csv-ForCB"
 
 It uses the ConfigurationManager PoSh module.
