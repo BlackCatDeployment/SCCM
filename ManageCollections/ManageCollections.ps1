@@ -188,7 +188,7 @@ Function New-Collection {
         #endregion ColMove
 
         #region ColRule
-        If (!([String]::IsNullOrEmpty($Folder))) {
+        If (!([String]::IsNullOrEmpty($RuleType))) {
             Add-CollectionRule -Collection $objNewCollection -Name $RuleName -Type $RuleType -Query $RuleQuery
         }
         #endregion ColRule
