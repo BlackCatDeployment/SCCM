@@ -1,12 +1,40 @@
+<#
+.Synopsis
+    Send an HTML report by mail of an ADR
+.DESCRIPTION
+    From an ADR Name, an HTML report is generated and sent by mail to show following information:
+    - Approved updates on the ADR
+    - Deployment schedules configured
+.PARAMETER ADRName
+    Name of the Automatic Deployment Rule to report
+.OUTPUTS
+   HTML report stored in $PSScriptRoot\<ADRName>-<date>.log
+.NOTES
+    Version:         1.0
+    Author:          Florian Valente
+    Date:            2018/11/14
+    Version History: 1.0 : 2018/11/14 - Florian Valente
+.EXAMPLE
+    ADRReport.ps1 -ADRName "ADR Patch Tuesday"
+.COMPONENT
+   This script must be run on a ConfigMgr Current Branch server on Windows Server 2012 R2 minimum.
+   It wasn't tested on ConfigMgr 2012 R2 neither on Windows Server 2008 R2.
+   It uses the ConfigurationManager PoSh module
+.LINK
+    https://bcdeployment.wordpress.com
+#>
+PARAM(
+    [Parameter(Mandatory=$true, Position=0)][String] $ADRName
+)
+
 # Import the ConfigurationManager.psd1 module
 Import-Module "$($ENV:SMS_ADMIN_UI_PATH)\..\ConfigurationManager.psd1"
 
 # Global variables
 $script_parent     = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $sitecode          = (Get-PSDrive -PSProvider CMSite).name
-$ADRName           = "ADR Patch Tuesday" #Name of the ADR to report
 $Days              = 28
-$strOutputFilePath = "$script_parent\SUPReport-$((Get-Date).ToString("yyyyMM")).html"
+$strOutputFilePath = "$script_parent\$($ADRName -replace " ", '')-$((Get-Date).ToString("yyyyMM")).html"
 
 $MailFrom          = "mailfrom@bcd.com" #Mail sender
 $MailTo            = @("toto@bcd.com","titi@bcd.com") #Mail recipients
@@ -51,6 +79,7 @@ Else {
     # Create body of the HTML file
     $title = "$(Get-Date -Format "MMMM") Approved Software Updates Report"
     $body = "<h1><u><center>$title</center></u></h1>"
+    $body += "<b>ADR used:</b> $ADRName</br>"
     $body += "<b>SUG created:</b> $($SUGName -join ", ")</br>"
     $body += "<b>Number of updates:</b> $($oUpdates.Count)</br></br>"
     $body += "<h2>Approved Updates</h2>"
