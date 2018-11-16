@@ -696,7 +696,7 @@ Function WriteToLog {
 # MAIN #
 ########
 If (!(Test-Path $csv_path)) {
-    Write-Host "$csv_path File was not found! Exit" -ForegroundColor
+    Write-Host "$csv_path File was not found! Exit" -ForegroundColor Red
     Exit
 }
 
