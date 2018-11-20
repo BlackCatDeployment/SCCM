@@ -119,3 +119,26 @@ It uses the ConfigurationManager PoSh module.
 I added Operational Collections created by Benoit Lecours in the CSV File **[CreateOperationalCollections-ForCB.csv](https://github.com/BlackCatDeployment/SCCM/blob/master/ManageCollections/CreateOperationalCollections-ForCB.csv)**
 
 Thanks to [Marius / Hican](https://gallery.technet.microsoft.com/scriptcenter/SCCM-2012-Management-b36e7aeb) and [Benoit Lecours](https://gallery.technet.microsoft.com/Set-of-Operational-SCCM-19fa8178) for their scripts basis.
+
+
+# ExportCollections Script
+
+## Description
+
+This script exports User and Device Collections in ConfigMgr Current Branch on an output CSV file.
+
+## How to use it
+
+Enter this command in a PowerShell prompt from a ConfigMgr Primary Server:
+
+.\ExportCollections.ps1 -File <*CSV_File*>
+
+## Logging
+
+The script logs everything in **ExportCollections.log** in the script path.
+It displays at the end of its execution the number of Success, Warnings and Errors that occured.
+
+## Notes
+
+This script generates a list of collections without checking dependences between collections (particularly for Limiting Collections).
+So it's advisable to verify this point before running ManageCollections.ps1 script.
