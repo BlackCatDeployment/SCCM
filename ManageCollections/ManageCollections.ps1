@@ -25,9 +25,9 @@
    Set the CSV file to use.
    It must be located on the script folder.
 .NOTES
-    Version:         1.4
+    Version:         1.5
     Author:          Florian Valente
-    Date:            2018/11/20
+    Date:            2018/11/21
     Version History: 1.0 : 2017/09/04 - Florian Valente
                          - Initial version
                      1.1 : 2017/09/18 - Florian Valente
@@ -42,6 +42,8 @@
                            - Add random hour:minute for the New-CMSchedule to avoid overload during SCCM collection updates
                      1.4 : 2018/11/20 - Florian Valente
                            - Review Log management
+                     1.5 : 2018/11/21 - Florian Valente
+                           - Now possible to set Incremental Update schedule and/or interval schedule
     Helpers:         Marius / Hican - http://www.hican.nl - @hicannl
                      https://gallery.technet.microsoft.com/scriptcenter/SCCM-2012-Management-b36e7aeb
                      Benoit Lecours
@@ -72,6 +74,7 @@ $AllDevicesCollection = "All Systems"
 $AllUsersCollection   = "All Users and User Groups"
 $CollectionTypeUser   = "User"
 $CollectionTypeDevice = "Device"
+$DefaultSchedule      = "D7"
 $script:objResult     = @{ Success=0; Warning=0; Error=0 }
 
 
@@ -136,16 +139,19 @@ Function New-Collection {
 
         #region ColSchedule
         ## Defining Collection Shedule
-        If (!([String]::IsNullOrEmpty($Schedule))) {
-            $objSchedule = Set-CollectionSchedule -Value $Schedule
+        If ([String]::IsNullOrEmpty($Schedule)) {
+            Write-Log "No Refresh Schedule was set in the CSV File. Default Schedule [$DefaultSchedule] defined" warning
+            $Schedule = $DefaultSchedule
+        }
+        
+        $objSchedule = Set-CollectionSchedule -Value $Schedule
+        If (-not [String]::IsNullOrEmpty($objSchedule.RefreshInterval)) {
             $CollectionProperties += @{
                 RefreshSchedule = New-CMSchedule -Start (Get-Date -Hour (Get-Random 23) -Minute (Get-Random 59)) -RecurInterval $objSchedule.RefreshInterval -RecurCount $objSchedule.RefreshCount
-                RefreshType = $objSchedule.RefreshType
             }
         }
-        Else {
-            Write-Log "No Refresh Schedule was set in the CSV File. [Incremental Updates] defined" warning
-            $CollectionProperties += @{ RefreshType = 4 } # Use Incremental Updates
+        $CollectionProperties += @{
+            RefreshType = $objSchedule.RefreshType
         }
         #endregion ColSchedule
 
@@ -550,15 +556,33 @@ Function Set-CollectionSchedule {
 
     # Default SCCM Schedule to set
     $objSchedule = @{
-        RefreshInterval = "days"
-        RefreshCount = 7
-        RefreshType = 4
+        RefreshInterval = ""
+        RefreshCount = 0
+        RefreshType = 0
     }
 
-    If ($Value.Length -ge 2) {
-        $refreshCheck    = $Value.SubString(0,1)
-        $refreshInterval = $Value.Length - $refreshCheck.Length
-        $refreshTime     = $Value.SubString($Value.Length - $refreshInterval, $refreshInterval)
+    $aSchedules = $Value -split ","
+
+    If (($aSchedules.Count -gt 1) -and ($aSchedules -notcontains "I")) {
+        Write-Log "More than one RefreshSchedule was found! Default Schedule [$DefaultSchedule] defined" warning
+        $aSchedules = @($DefaultSchedule)
+    }
+    
+    ForEach ($Schedule in $aSchedules) {
+        If ($Schedule.ToLower() -eq "i") {
+            $objSchedule.RefreshType = 4
+            Write-Log "RefreshSchedule defined to [Incremental Updates]"
+            Continue
+        }
+        ElseIf ($Schedule.Length -lt 2) {
+            Write-Log "RefreshSchedule should be 2 characters minimum and in the format of <letter><number>! Default Schedule [$DefaultSchedule] defined" warning
+            $Schedule = $DefaultSchedule
+        }
+
+        $objSchedule.RefreshType += 2
+
+        $refreshCheck    = $Schedule.SubString(0,1)
+        $refreshTime     = $Schedule.SubString(1)
 
         If ($refreshCheck.ToLower() -eq "m") {
             $objSchedule.RefreshInterval = "minutes"
@@ -592,13 +616,10 @@ Function Set-CollectionSchedule {
         Else {
             Write-Log "No valid time entered" warning
         }
-
-        $objSchedule.RefreshType = 2
-        Write-Log "RefreshSchedule defined to $($objSchedule.RefreshCount) $($objSchedule.RefreshInterval)"
     }
-    Else {
-        $objSchedule.RefreshType = 4 # Use Incremental Updates
-        Write-Log "RefreshSchedule should be 2 characters long and in the format of <letter><number>! [Incremental Updates] defined" error
+
+    If (-not [String]::IsNullOrEmpty($objSchedule.RefreshInterval)) {
+        Write-Log "RefreshSchedule defined to [$($objSchedule.RefreshCount) $($objSchedule.RefreshInterval)]"
     }
 
     return $objSchedule
