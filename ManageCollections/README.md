@@ -60,6 +60,7 @@ Implement | CollectionName | CollectionType | CollectionLimit | CollectionFolder
 - **RefreshSchedule**
   - Set the schedule for the update collection Membership Rule
   - 1st character:
+    - Set **I** for incremental update
     - Set **D** for day
     - Set **M** for minute
     - Set **H** for hour
@@ -67,7 +68,8 @@ Implement | CollectionName | CollectionType | CollectionLimit | CollectionFolder
     - Set the delay
   - Example: **D7** for 7 days
   - If a wrong value was set, 7 days is defined by default
-  - If no value was set, incremental updates is defined by default
+  - If no value was set, 7 days is defined by default
+  - It's possible to set incremental update + schedule by adding "I," to the schedule. Example: **I,D7**
 
 - **User**
   - Grant Administrative User(s) to the collection
