@@ -10,10 +10,11 @@
 .OUTPUTS
    HTML report stored in $PSScriptRoot\<ADRName>-<date>.log
 .NOTES
-    Version:         1.0
+    Version:         1.1
     Author:          Florian Valente
-    Date:            2018/11/14
+    Date:            2019/02/13
     Version History: 1.0 : 2018/11/14 - Florian Valente
+                     1.1 : 2019/02/13 - Florian Valente
 .EXAMPLE
     ADRReport.ps1 -ADRName "ADR Patch Tuesday"
 .COMPONENT
@@ -38,7 +39,8 @@ $strOutputFilePath = "$script_parent\$($ADRName -replace " ", '')-$((Get-Date).T
 
 $MailFrom          = "mailfrom@bcd.com" #Mail sender
 $MailTo            = @("toto@bcd.com","titi@bcd.com") #Mail recipients
-$MailCc            = @("toto@bcd.com","titi@bcd.com") #Mail Cc
+$MailCc            = @("") #Mail Cc
+$MailBcc           = @("") #Mail Bcc
 $MailSMTP          = "smtp.bcd.com" #SMTP server to use
 
 
@@ -95,5 +97,20 @@ Else {
 # Reset the location to the previous state
 Set-Location $InitialLocation.Path
 
+# Send mail
+$MailParams = @{
+    From = $MailFrom
+    To = $MailTo
+    Body = $report | Out-String
+    SmtpServer = $MailSMTP
+    Subject = "[SCCM] $title"
+}
 
-Send-MailMessage -From $MailFrom -To $MailTo -Cc $MailCc -Body ($report | Out-String) -BodyAsHtml -SmtpServer $MailSMTP -Subject "[SCCM] $title"
+If (![String]::IsNullOrEmpty($MailCc)) {
+    $MailParams += @{ Cc = $MailCc }
+}
+If (![String]::IsNullOrEmpty($MailBcc)) {
+    $MailParams += @{ Bcc = $MailBcc }
+}
+
+Send-MailMessage @MailParams -BodyAsHtml
