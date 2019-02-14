@@ -1,3 +1,4 @@
+# Description
 This script is used to send a mail HTML report of a specific ADR with following information:
 - Approved updates by the ADR
 - Deployment schedules set for the ADR
