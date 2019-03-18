@@ -82,6 +82,8 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
         Write-Host "Report was already generated. Nothing to do"
         continue
     }
+    
+    $title = "$(Get-Date -Format "MMMM") $ADRTitle"
 
     $SUGName = (Get-CMSoftwareUpdateGroup -Name "$ADRName*" | Where-Object { $_.DateCreated -ge (Get-Date).AddDays(-$Days) }).LocalizedDisplayName
     If ($SUGName -eq $null) {
@@ -111,7 +113,6 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
         $header += "</style>"
 
         # Create body of the HTML file
-        $title = "$(Get-Date -Format "MMMM") $ADRTitle"
         $body = "<h1><u><center>$title</center></u></h1>"
         $body += "<b>ADR used:</b> $ADRName</br>"
         $body += "<b>SUG created:</b> $($SUGName -join ", ")</br>"
