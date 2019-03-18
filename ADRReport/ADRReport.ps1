@@ -11,12 +11,13 @@
 .OUTPUTS
    HTML report stored in $PSScriptRoot\<ADRName>-<date>.log
 .NOTES
-    Version:         2.0
+    Version:         2.1
     Author:          Florian Valente
-    Date:            2019/02/14
+    Date:            2019/03/18
     Version History: 1.0 : 2018/11/14 - Florian Valente
                      1.1 : 2019/02/13 - Florian Valente
                      2.0 : 2019/02/14 - Florian Valente
+                     2.1 : 2019/03/18 - Florian Valente
 .EXAMPLE
     ADRReport.ps1 -File "settings.xml"
 .COMPONENT
@@ -67,7 +68,6 @@ $MailSMTP          = $xml.settings.mail.server
 
 # Initialize location for managing ConfigMgr! MANDATORY before continue
 $InitialLocation = Get-Location
-Set-Location "$($sitecode):"
 
 Write-Host "Successfully connected to $sitecode Site"
 
@@ -83,6 +83,7 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
         continue
     }
     
+    Set-Location "$($sitecode):"
     $title = "$(Get-Date -Format "MMMM") $ADRTitle"
 
     $SUGName = (Get-CMSoftwareUpdateGroup -Name "$ADRName*" | Where-Object { $_.DateCreated -ge (Get-Date).AddDays(-$Days) }).LocalizedDisplayName
