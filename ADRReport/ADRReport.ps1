@@ -125,13 +125,14 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
         $body += [System.Web.HttpUtility]::HtmlDecode(($oDeployments | ConvertTo-Html -Title "Deployment Schedules" -PreContent "<h2>Deployment Schedules</h2>"))
 
         $report = ConvertTo-Html -Body $body -Head $header -Title $title
-        try {
-            $report | Set-Content $strOutputFilePath
-            Write-Host "Report generated successfully on $strOutputFilePath"
-        }
-        catch {
-            Write-Warning "Report was not generated! $($_.Exception.Message)"
-        }
+    }
+
+    try {
+        $report | Set-Content $strOutputFilePath
+        Write-Host "Report generated successfully on $strOutputFilePath"
+    }
+    catch {
+        Write-Warning "Report was not generated! $($_.Exception.Message)"
     }
 
     # Reset the location to the previous state
