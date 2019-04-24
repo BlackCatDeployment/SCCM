@@ -11,7 +11,7 @@
 .OUTPUTS
    HTML report stored in $PSScriptRoot\<ADRName>-<date>.log
 .NOTES
-    Version:         2.2
+    Version:         2.3
     Author:          Florian Valente
     Date:            2019/04/24
     Version History: 1.0 : 2018/11/14 - Florian Valente
@@ -19,6 +19,7 @@
                      2.0 : 2019/02/14 - Florian Valente
                      2.1 : 2019/03/18 - Florian Valente
                      2.2 : 2019/04/24 - Florian Valente
+                     2.3 : 2019/04/24 - Florian Valente
 .EXAMPLE
     ADRReport.ps1 -File "settings.xml"
 .COMPONENT
@@ -104,7 +105,8 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
             Select-Object @{ N="Wave Name"; E={$_.CollectionName} },
                 #@{ N="Available Time"; E={(Get-Date $_.DeploymentTime -Format "yyyy/MM/dd")} },
                 @{ N="Deployment Date"; E={(Get-Date $_.EnforcementDeadline -Format "yyyy/MM/dd")} },
-                @{ N="Systems Targeted"; E={$_.NumberTargeted} } | Sort-Object 'Deployment Date'
+                #@{ N="Systems Targeted"; E={$_.NumberTargeted} } #Not returns correct data...
+                @{ N="Systems Targeted"; E={(Get-CMCollection -Name $_.CollectionName).MemberCount} } | Sort-Object 'Deployment Date'
 
         # Create header of the HTML file
         $header = "<style>"
