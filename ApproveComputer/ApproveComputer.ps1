@@ -66,7 +66,7 @@ $InitialLocation = Get-Location
 Write-Host "Successfully connected to $sitecode Site"
 
 Write-Host "Generating report for Approved computers..."
-$strOutputFilePath = "$script_parent\Reports\ApprovedComputer-$((Get-Date).ToString("yyyyMMddHHmmss")).html"
+$strOutputFilePath = "$ReportPath\ApprovedComputer-$((Get-Date).ToString("yyyyMMddHHmmss")).html"
 $title = "Approved computers on $(Get-Date -Format "yyyy/MM/dd")"
 # Create header of the HTML file
 $header = "<style>"
