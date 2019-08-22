@@ -1,0 +1,10 @@
+<settings>
+	<cmpath>\\SCCMPRIMARY\sms_SITECODE</cmpath>
+	<mail>
+		<server>FQDN_SMTP</server>
+		<from>from@mail.com</from>
+		<to>to@mail.com</to>
+		<cc></cc>
+		<bcc></bcc>
+	</mail>
+</settings>
