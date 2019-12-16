@@ -1,0 +1,9 @@
+<settings>
+	<mail>
+		<server>smtp.bcd.com</server>
+		<from>mailfrom@bcd.com</from>
+		<to>toto@bcd.com,titi@bcd.com</to>
+		<cc></cc>
+		<bcc></bcc>
+	</mail>
+</settings>
