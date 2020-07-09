@@ -11,15 +11,16 @@
 .OUTPUTS
    HTML report stored in $PSScriptRoot\<ADRName>-<date>.log
 .NOTES
-    Version:         2.3
+    Version:         2.4
     Author:          Florian Valente
-    Date:            2019/04/24
+    Date:            2020/07/09
     Version History: 1.0 : 2018/11/14 - Florian Valente
                      1.1 : 2019/02/13 - Florian Valente
                      2.0 : 2019/02/14 - Florian Valente
                      2.1 : 2019/03/18 - Florian Valente
                      2.2 : 2019/04/24 - Florian Valente
                      2.3 : 2019/04/24 - Florian Valente
+                     2.4 : 2020/07/09 - Florian Valente
 .EXAMPLE
     ADRReport.ps1 -File "settings.xml"
 .COMPONENT
@@ -88,7 +89,7 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
     Set-Location "$($sitecode):"
     $title = "$(Get-Date -Format "MMMM") $ADRTitle"
 
-    $SUGName = (Get-CMSoftwareUpdateGroup -Name "$ADRName*" | Where-Object { $_.DateLastModified -ge (Get-Date).AddDays(-$Days) }).LocalizedDisplayName
+    $SUGName = (Get-CMSoftwareUpdateGroup -Name "$ADRName*" | Where-Object { $_.DateCreated -ge (Get-Date).AddDays(-$Days) }).LocalizedDisplayName
     If ($SUGName -eq $null) {
         Write-Host "No ADR was created for this month."
         $report = "No ADR was created for this month."
