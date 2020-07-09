@@ -55,7 +55,7 @@ Import-Module "$($ENV:SMS_ADMIN_UI_PATH)\..\ConfigurationManager.psd1"
 $script_parent     = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ReportPath        = "$script_parent\Reports"
 $sitecode          = (Get-PSDrive -PSProvider CMSite).name
-$Days              = 28
+$Days              = 7
 
 If (-not (Test-Path $ReportPath)) { New-Item $ReportPath -ItemType Directory | Out-Null }
 
@@ -89,13 +89,18 @@ ForEach ($oADR in $xml.settings.adrlist.adr) {
     Set-Location "$($sitecode):"
     $title = "$(Get-Date -Format "MMMM") $ADRTitle"
 
+    If (-not ((Get-CMAutoDeploymentRule -Name $ADRName -Fast).LastRunTime -ge (Get-Date).AddDays(-$Days))) {
+        Write-Host "No ADR was run for this month."
+        continue
+    }
+
     $SUGName = (Get-CMSoftwareUpdateGroup -Name "$ADRName*" | Where-Object { $_.DateCreated -ge (Get-Date).AddDays(-$Days) }).LocalizedDisplayName
     If ($SUGName -eq $null) {
-        Write-Host "No ADR was created for this month."
-        $report = "No ADR was created for this month."
+        Write-Host "No SUG was created for this month."
+        $report = "No SUG was created for this month."
     }
     Else {
-        Write-Host "ADR found"
+        Write-Host "SUG found"
         $oUpdates = (Get-CMSoftwareUpdate -UpdateGroupName $SUGName -Fast) | 
             Select-Object @{ N="Article ID"; E={"<a href=""$($_.LocalizedInformativeURL)"">"+$_.ArticleID+"</a>"} },
                 @{ N="Update Name"; E={$_.LocalizedDisplayName} },
