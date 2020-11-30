@@ -1,0 +1,13 @@
+<settings>
+	<report>
+		<collectionfolder>Compliance\MailReports</collectionfolder>
+		<title>SCCM Compliance Report</title>
+	</report>
+	<mail>
+		<server></server>
+		<from></from>
+		<to></to>
+		<cc></cc>
+		<bcc></bcc>
+	</mail>
+</settings>
