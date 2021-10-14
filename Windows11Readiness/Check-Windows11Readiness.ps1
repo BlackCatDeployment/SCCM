@@ -12,6 +12,7 @@
     https://docs.microsoft.com/en-us/windows-hardware/design/minimum/minimum-hardware-requirements-overview
 #>
 #Requires -Version 5
+#Requires -RunAsAdministrator
 $ErrorActionPreference = "SilentlyContinue"
 
 # Registry key to populate
@@ -183,14 +184,14 @@ using System.Runtime.InteropServices;
 "@
 
 # Define report columns
-$ReportParams = @("BuildNumber", "ProcessorSpeed", "CPUCores", "RAMSize", `
+$ReportParams = @("BuildNumber", "CPUName", "CPUSpeed", "CPUCores", "RAMSize", `
     "FreeDiskSpace", "TPMVersion", "FirmwareType", "SecureBootEnabled", "GraphicsResolution")
 
 #Windows 11 system requirements
 Write-Host "Windows 11 requirements:"
 $Win11Report = "" | Select-Object -Property $ReportParams
 $Win11Report.'BuildNumber' = 19041 # Build 2004
-$Win11Report.'ProcessorSpeed' = "1"
+$Win11Report.'CPUSpeed' = "1"
 $Win11Report.'CPUCores' = "2"
 $Win11Report.'RAMSize' = "4"
 $Win11Report.'FreeDiskSpace' = "64"
@@ -235,7 +236,8 @@ $GraphicsResolution = (Get-WmiObject win32_VideoController).CurrentVerticalResol
 Write-Host "System configuration:"
 $Report = "" | Select-Object -Property $ReportParams
 $Report.'BuildNumber' = $BuildNumber
-$Report.'ProcessorSpeed' = $CurrentClockSpeed
+$Report.'CPUName' = $Processor.Name
+$Report.'CPUSpeed' = $CurrentClockSpeed
 $Report.'CPUCores' = $NumberOfCores
 $Report.'RAMSize' = $RAMSize
 $Report.'FreeDiskSpace' = $FreeSpace
@@ -246,19 +248,20 @@ $Report.'GraphicsResolution' = $GraphicsResolution
 $Report
 
 # Get compatibility results
+Write-Host "Results:"
 $Results = [PSCustomObject]@{
-    "Hostname"             = $env:COMPUTERNAME
     "Build Number"         = [bool]($Report.'BuildNumber' -ge $Win11Report.'BuildNumber')
-    "Processor Speed"      = [bool]($Report.'ProcessorSpeed' -ge $Win11Report.'ProcessorSpeed')
-    "Number Of CPU Cores"  = [bool]($Report.'CPUCores' -ge $Win11Report.'CPUCores')
-    "Processor Compatible" = [bool]$ProcCompatible.IsValid
+    "CPU Speed"            = [bool]($Report.'CPUSpeed' -ge $Win11Report.'CPUSpeed')
+    "CPU Cores"            = [bool]($Report.'CPUCores' -ge $Win11Report.'CPUCores')
+    "CPU Family"           = [bool]$ProcCompatible.IsValid
     "RAM Size"             = [bool]($Report.'RAMSize' -ge $Win11Report.'RAMSize')
     "Free Disk Space"      = [bool]($Report.'FreeDiskSpace' -ge $Win11Report.'FreeDiskSpace')
     "Firmware Type"        = [bool]($Report.'FirmwareType' -eq $Win11Report.'FirmwareType')
-    "SecureBoot"           = [bool]($Report.'SecureBootEnabled' -eq $Win11Report.'SecureBootEnabled')
+    "Secure Boot"          = [bool]($Report.'SecureBootEnabled' -eq $Win11Report.'SecureBootEnabled')
     "TPM"                  = [bool]($Report.'TPMVersion' -ge $Win11Report.'TPMVersion')
     "Graphics Resolution"  = [bool]($Report.'GraphicsResolution' -ge $Win11Report.'GraphicsResolution')
 }
+$Results
 
 # Display final result
 if ($Results.psobject.properties.value -contains $false) {
