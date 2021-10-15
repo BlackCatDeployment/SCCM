@@ -6,6 +6,7 @@
     This script can be used with SCCM or other tools for getting the registry key value created.
     .OUTPUTS
     Write a registry key "HKLM:\SOFTWARE\BlackCat" value "Win11Ready" with True or False data
+    Write a registry key "HKLM:\SOFTWARE\BlackCat" value "Win11Reason" with blocable reason
     .AUTHOR
     Florian VALENTE
     .NOTES
@@ -18,6 +19,7 @@ $ErrorActionPreference = "SilentlyContinue"
 # Registry key to populate
 $RegPath = "HKLM:\SOFTWARE\BlackCat"
 $RegName = "Win11Ready"
+$RegName1 = "Win11Reason"
 
 # Custom definition for checking CPU family
 $CPUDefinition = @"
@@ -272,8 +274,10 @@ $Results
 if ($Results.psobject.properties.value -contains $false) {
     Write-Host "This device is not compatible with Windows 11" -ForegroundColor Red
     Set-ItemProperty $RegPath -Name $RegName -Value $false -Force | Out-Null
+    Set-ItemProperty $RegPath -Name $RegName1 -Value (($Results.psobject.Properties | ? {$_.value -eq $false}).Name -join ", ") -Force | Out-Null
 }
 else {
     Write-Host "This device is compatible with Windows 11" -ForegroundColor Green
     Set-ItemProperty $RegPath -Name $RegName -Value $true -Force | Out-Null
+    Set-ItemProperty $RegPath -Name $RegName1 -Value "" -Force | Out-Null
 }
