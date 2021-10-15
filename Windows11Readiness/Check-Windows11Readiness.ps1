@@ -204,6 +204,11 @@ $Win11Report
 
 # Get computer data
 $BuildNumber = (Get-WmiObject Win32_OperatingSystem).BuildNumber
+If ($BuildNumber -ge 22000) {
+    Write-Host "This device is already on Windows 11" -ForegroundColor Green
+    Set-ItemProperty $RegPath -Name $RegName -Value $true -Force | Out-Null
+    exit 0
+}
 $Processor = @(Get-WmiObject Win32_Processor)[0]
 $MaxClockSpeed = $Processor.MaxClockSpeed
 $CurrentClockSpeed = [math]::round(($Processor.CurrentClockSpeed)/1000, 1)
@@ -231,7 +236,7 @@ If ($FirmwareType -eq "UEFI") {
 Else {
     $SecureBootState = $false
 }
-$GraphicsResolution = (Get-WmiObject win32_VideoController).CurrentVerticalResolution[0]
+$GraphicsResolution = (Get-WmiObject win32_VideoController).CurrentVerticalResolution | Select-Object -First 1
 
 Write-Host "System configuration:"
 $Report = "" | Select-Object -Property $ReportParams
